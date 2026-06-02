@@ -1,10 +1,4 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "env": {
-    "RESEND_API_KEY": "@resend_api_key",
-    "RESEND_FROM_EMAIL": "@resend_from_email",
-    "CONTACT_TO_EMAIL": "@contact_to_email",
-    "WEBSITE_NAME": "@website_name"
-  }
+  "outputDirectory": "dist"
 }
