@@ -30,6 +30,17 @@ Recommended deployment options:
  - Vercel will run `npm run build` and publish the `dist` directory as the static site; serverless functions are available at `/api/contact`.
  - Test the contact form in production by visiting your site and submitting the form.
 
+Vercel CI (optional GitHub Actions)
+ - This repo includes `.github/workflows/deploy-vercel.yml` which will deploy to Vercel when you provide these GitHub Secrets: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`.
+ - To link the project locally and obtain IDs/tokens, install the Vercel CLI and run the helper script:
+
+```bash
+npm i -g vercel
+./scripts/vercel-link.sh
+```
+
+ - After you create a `VERCEL_TOKEN` in Vercel and set the `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` in GitHub Secrets, pushes to `main`/`master` will trigger the deploy workflow.
+
 Post-deploy checks:
 - Visit your app URL and test the contact form.
 - Confirm server logs show successful email sends and that `RESEND_API_KEY` is present in environment.
