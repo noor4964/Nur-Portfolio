@@ -116,6 +116,19 @@ html{scroll-behavior:smooth;}
 }
 .nl:hover,.nl.on{color:var(--accent);}
 
+.site-nav{isolation:isolate;}
+.nav-brand{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:.1em;color:var(--text);}
+.nav-actions{display:flex;gap:12px;align-items:center;}
+.nav-links{display:flex;align-items:center;gap:20px;white-space:nowrap;}
+.theme-toggle{width:34px;height:34px;border-radius:10px;border:1px solid var(--input-border);background:var(--bg-2);color:var(--text);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:14px;line-height:1;transition:border-color .25s ease,transform .2s ease;}
+.theme-toggle:hover{border-color:var(--muted);transform:translateY(-1px);}
+.hamburger{display:none;align-items:center;justify-content:center;flex-direction:column;gap:4px;width:40px;height:36px;border-radius:10px;border:1px solid var(--input-border);background:var(--bg-2);cursor:pointer;}
+.hamburger .bar{display:block;width:18px;height:1.5px;background:var(--text);opacity:.9;}
+
+.mobile-menu{position:fixed;top:68px;left:0;right:0;z-index:999;background:var(--bg);border-bottom:1px solid var(--card-border);padding:10px 18px 14px;display:flex;flex-direction:column;gap:8px;opacity:0;transform:translateY(-8px);pointer-events:none;transition:opacity .2s ease,transform .2s ease;}
+.mobile-menu.open{opacity:1;transform:translateY(0);pointer-events:auto;}
+.mobile-menu button{border:1px solid var(--card-border);background:var(--bg-2);color:var(--text);padding:12px 14px;border-radius:10px;text-align:left;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;}
+
 /* ── buttons ── */
 .btnP{
   display:inline-flex;align-items:center;gap:8px;
@@ -273,6 +286,46 @@ html{scroll-behavior:smooth;}
 @media (max-width:560px){
   .skill-panel-title{margin-bottom:28px;}
   .skill-panel-card{border-radius:18px;}
+}
+
+@media (max-width:1024px){
+  #hero-content{padding:0 26px !important;}
+  #stack,#about,#projects,#publications,#contact{padding-left:26px !important;padding-right:26px !important;}
+  #skills .reveal{padding-left:26px !important;padding-right:26px !important;}
+  .about-grid{grid-template-columns:1fr !important;gap:44px !important;}
+  .about-duo-grid{grid-template-columns:1fr !important;gap:22px !important;}
+  .contact-grid{grid-template-columns:1fr !important;gap:34px !important;}
+  .projects-toolbar{width:100%;justify-content:flex-start;flex-wrap:wrap;}
+}
+
+@media (max-width:768px){
+  #home{padding-top:92px !important;padding-bottom:56px !important;min-height:auto !important;}
+  .site-nav{padding:14px 18px !important;}
+  .nav-actions{gap:8px;}
+  .nav-links{display:none !important;}
+  .hamburger{display:inline-flex;}
+  .theme-toggle{width:32px;height:32px;}
+  #hero-content{transform:none !important;}
+  .hero-3d-scene{display:none;}
+  .hero-floor{opacity:.3;}
+  .hero-cta{flex-direction:column;gap:10px !important;}
+  .hero-cta .btnP,.hero-cta .btnO{width:100%;justify-content:center;}
+  #stack,#about,#projects,#publications,#contact{padding-top:72px !important;padding-bottom:72px !important;}
+  #skills .reveal{padding-top:64px !important;}
+  .projects-toolbar{display:grid !important;grid-template-columns:1fr;gap:10px !important;}
+  .projects-toolbar .viewall-input,
+  .projects-toolbar .viewall-select,
+  .projects-toolbar .btnO{width:100%;}
+  #about h2{font-size:clamp(34px,12vw,52px) !important;line-height:.96 !important;margin-bottom:22px !important;}
+  .contact-grid .ci{font-size:16px;}
+  .site-footer{padding:20px 18px !important;flex-direction:column;gap:12px;align-items:flex-start !important;}
+}
+
+@media (max-width:560px){
+  #hero-content{padding:0 18px !important;}
+  #stack,#about,#projects,#publications,#contact{padding-left:18px !important;padding-right:18px !important;}
+  #skills .reveal{padding-left:18px !important;padding-right:18px !important;}
+  .about-stats-grid{grid-template-columns:1fr !important;}
 }
 `;
 
@@ -988,16 +1041,16 @@ export default function Portfolio() {
       <div className="cring" style={{ left:ringPos.x, top:ringPos.y }}/>
 
       {/* ══════════ NAV ══════════ */}
-      <nav className={"nav-anim" + (mounted?" visible":"")} style={{
+      <nav className={"site-nav nav-anim" + (mounted?" visible":"")} style={{
         position:"fixed", top:0, left:0, right:0, zIndex:1000,
         padding:"18px 44px", display:"flex", justifyContent:"space-between", alignItems:"center",
         borderBottom:"1px solid var(--card-border)",
         background:"var(--bg)", backdropFilter:"blur(18px)",
       }}>
-        <div style={{ fontFamily:"'Bebas Neue'", fontSize:19, letterSpacing:".1em", color:"var(--text)" }}>
+        <div className="nav-brand">
           SN.ALAM
         </div>
-        <div style={{ display:"flex", gap:12, alignItems:"center" }}>
+        <div className="nav-actions">
           <div className="nav-links" style={{ display:"flex" }}>
             {NAV.map(s => (
               <button key={s} className={`nl ${active===s?"on":""}`} onClick={() => { go(s); setMobileOpen(false); }}>{s}</button>
@@ -1160,7 +1213,7 @@ export default function Portfolio() {
       {/* ══════════ ABOUT ══════════ */}
       <section id="about" style={{ padding:"108px 44px" }}>
         <div style={{ maxWidth:1100, margin:"0 auto" }}>
-          <div className="reveal" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:80, alignItems:"start" }}>
+          <div className="reveal about-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:80, alignItems:"start" }}>
             {/* copy */}
             <div>
               <div className="slbl" style={{ marginBottom:16 }}>// 01 — About</div>
@@ -1188,7 +1241,7 @@ export default function Portfolio() {
 
             {/* stats + timeline */}
             <div>
-              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:1, background:"var(--card-border)", marginBottom:36 }}>
+              <div className="about-stats-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:1, background:"var(--card-border)", marginBottom:36 }}>
                 {[
                   {n:"3.80", l:"CGPA / 4.00"},
                   {n:"2+",   l:"Publications"},
@@ -1202,7 +1255,7 @@ export default function Portfolio() {
                 ))}
               </div>
 
-              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:28 }}>
+              <div className="about-duo-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:28 }}>
                 {/* education */}
                 <div>
                   <div className="slbl" style={{ marginBottom:18 }}>Education</div>
@@ -1255,7 +1308,7 @@ export default function Portfolio() {
               <div className="slbl" style={{ marginBottom:14 }}>// 04 — Projects</div>
               <h2 style={{ fontFamily:"'Bebas Neue'", fontSize:"clamp(36px,5vw,60px)", color:"var(--text)" }}>Selected Work</h2>
             </div>
-            <div style={{ display:'flex', gap:12, alignItems:'center' }}>
+            <div className="projects-toolbar" style={{ display:'flex', gap:12, alignItems:'center' }}>
               <input
                 id="selected-search"
                 className="viewall-input"
@@ -1422,7 +1475,7 @@ export default function Portfolio() {
             }}>Something Great</h2>
           </div>
 
-          <div className="reveal" style={{ display:"grid", gridTemplateColumns:"1fr 1.6fr", gap:60 }}>
+          <div className="reveal contact-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1.6fr", gap:60 }}>
             {/* info */}
             <div style={{ display:"flex", flexDirection:"column", gap:26 }}>
               {[
@@ -1482,7 +1535,7 @@ export default function Portfolio() {
       </section>
 
       {/* ══════════ FOOTER ══════════ */}
-      <footer style={{
+      <footer className="site-footer" style={{
         padding:"26px 44px", borderTop:"1px solid var(--card-border)",
         display:"flex", justifyContent:"space-between", alignItems:"center",
       }}>
