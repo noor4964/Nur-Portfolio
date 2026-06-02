@@ -328,7 +328,7 @@ html.light-theme .hero-orb{
 
 /* Project viewer modal */
 .modal-backdrop{
-  position:fixed;inset:0;z-index:1400;
+  position:fixed;inset:0;z-index:20000;
   background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;
   padding:24px;backdrop-filter:blur(6px);
 }
@@ -350,3 +350,29 @@ html.light-theme .hero-orb{
 .modal .modal-actions{display:flex;gap:10px;flex-wrap:wrap}
 .modal{animation:fadeUp .25s ease}
 .modal-backdrop{animation:fadeUp .2s ease}
+.modal .reveal{opacity:1;transform:none;}
+
+.modal-viewall{
+  width:min(1100px,95vw);
+  max-height:86vh;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.viewall-scroll{
+  overflow:auto;
+  padding-right:6px;
+  max-height:60vh;
+}
+.viewall-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;
+}
+.viewall-item .pc{height:100%;}
+.viewall-item .pc:hover{transform:perspective(900px) scale(1.06);}
+
+@media (max-width:900px){
+  .viewall-grid{grid-template-columns:1fr;}
+  .viewall-scroll{max-height:58vh;}
+}

@@ -258,6 +258,114 @@ const PROJECTS = [
   },
 ];
 
+const SELECTED_REPO_INDICES = [2, 3, 7, 16, 17, 21];
+
+// Projects to comment out (will be filtered from both static and fetched lists)
+// Provide numbers as integers corresponding to original ordering (1-based)
+const COMMENT_OUT_NUMS = new Set([11,12,3,5,16,18,21,23,24,26]);
+
+const renumberProjects = (items) => (
+  (items || []).map((p, i) => ({ ...p, n: String(i + 1).padStart(2, "0") }))
+);
+
+const formatRepoTitle = (name) => (
+  String(name || "")
+    .replace(/[-_]+/g, " ")
+    .replace(/\b\w/g, (m) => m.toUpperCase())
+    .trim()
+);
+
+const uniq = (items) => Array.from(new Set(items.filter(Boolean)));
+
+const inferRepoMeta = (name) => {
+  const lower = String(name || "").toLowerCase();
+  if (/(portfolio)/.test(lower)) {
+    return {
+      sub: "Personal Portfolio",
+      desc: "Personal portfolio website showcasing selected work, skills, and contact details.",
+      tags: ["React", "UI", "Frontend"],
+    };
+  }
+  if (/(e-?commerce|store|shop)/.test(lower)) {
+    return {
+      sub: "E-Commerce UI",
+      desc: "E-commerce interface with product browsing, detail views, and a cart-oriented flow.",
+      tags: ["E-Commerce", "UI", "Frontend"],
+    };
+  }
+  if (/(flutter)/.test(lower)) {
+    return {
+      sub: "Mobile App",
+      desc: "Flutter mobile app focusing on clean UI flows and reusable components.",
+      tags: ["Flutter", "Dart", "Mobile"],
+    };
+  }
+  if (/(react)/.test(lower)) {
+    return {
+      sub: "React App",
+      desc: "React-based application with component-driven UI and stateful interactions.",
+      tags: ["React", "Frontend"],
+    };
+  }
+  if (/(assistant|bot)/.test(lower)) {
+    return {
+      sub: "Automation Assistant",
+      desc: "Automation-focused assistant with command handling and task workflows.",
+      tags: ["Automation", "CLI"],
+    };
+  }
+  if (/(ml|model|vision|cvpr|ai)/.test(lower)) {
+    return {
+      sub: "ML Project",
+      desc: "Machine learning project exploring data preparation, modeling, and evaluation.",
+      tags: ["Machine Learning", "Python"],
+    };
+  }
+  if (/(management|system)/.test(lower)) {
+    return {
+      sub: "Management System",
+      desc: "CRUD-style management system with role-based workflows and data views.",
+      tags: ["CRUD", "Database"],
+    };
+  }
+  if (/(web)/.test(lower)) {
+    return {
+      sub: "Web Project",
+      desc: "Web project with multi-page layout, navigation, and responsive styling.",
+      tags: ["HTML", "CSS", "JavaScript"],
+    };
+  }
+  return {
+    sub: "Software Project",
+    desc: "Software project focused on clean structure, core features, and maintainable code.",
+    tags: ["Software"],
+  };
+};
+
+const buildProjectFromRepo = (repo, idx) => {
+  const title = formatRepoTitle(repo?.name || "Untitled");
+  const language = repo?.language || "";
+  const inferred = inferRepoMeta(repo?.name || "");
+  const topicTags = Array.isArray(repo?.topics) ? repo.topics.slice(0, 3) : [];
+  const tags = uniq([language, ...inferred.tags, ...topicTags]).slice(0, 5);
+  if (!tags.length) tags.push("Software");
+  const year = repo?.pushed_at ? String(new Date(repo.pushed_at).getFullYear()) : "-";
+  const sub = inferred.sub || (language ? `${language} Project` : "Software Project");
+  const desc = repo?.description && repo.description.trim()
+    ? repo.description.trim()
+    : inferred.desc;
+  return {
+    n: String(idx + 1).padStart(2, "0"),
+    title,
+    sub,
+    desc,
+    tags,
+    year,
+    type: repo?.fork ? "Fork" : "Project",
+    link: repo?.html_url || "",
+  };
+};
+
 const SKILLS = [
   {cat:"Languages", items:["Python","TypeScript","JavaScript","PHP","C/C++","R","Dart"]},
   {cat:"AI / ML",   items:["PyTorch","TensorFlow","Scikit-learn","OpenCV","YOLOv8","HuggingFace"]},
@@ -453,6 +561,18 @@ export default function Portfolio() {
   const [selectedProject, setSelectedProject] = useState(null);
   const [scrollT, setScrollT] = useState(0);
   const [marqueePaused, setMarqueePaused] = useState(false);
+  // initialize projects: remove commented items from the static array and renumber
+  const [projects, setProjects] = useState(() => {
+    const filtered = (PROJECTS || []).filter((p, i) => {
+      // if static project has `n`, respect it; otherwise use index
+      const orig = p && p.n ? Number(p.n) : i + 1;
+      return !COMMENT_OUT_NUMS.has(orig);
+    });
+    return renumberProjects(filtered);
+  });
+  const [viewAllOpen, setViewAllOpen] = useState(false);
+  const [projectQuery, setProjectQuery] = useState("");
+  const [projectSort, setProjectSort] = useState("recent");
 
   const ringRef = useRef({ x:-100, y:-100 });
   const rafRef  = useRef(null);
@@ -460,6 +580,37 @@ export default function Portfolio() {
   useScrollReveal();
 
   useEffect(()=>{ setMounted(true); }, []);
+
+  useEffect(() => {
+    let active = true;
+    const loadProjects = async () => {
+      try {
+        const res = await fetch("https://api.github.com/users/noor4964/repos?per_page=100&sort=updated");
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!Array.isArray(data)) return;
+        const pushed = data.filter((repo) => repo && repo.pushed_at);
+        if (!pushed.length) return;
+        const pinned = SELECTED_REPO_INDICES.map((i) => pushed[i - 1]).filter(Boolean);
+        const pinnedKeys = new Set(pinned.map((repo) => repo.full_name || repo.name));
+        const rest = pushed.filter((repo) => !pinnedKeys.has(repo.full_name || repo.name));
+        const combined = [...pinned, ...rest];
+        // filter out any repository that looks like the personal portfolio
+        const filteredCombined = combined.filter((repo) => {
+          const name = String(repo?.name || repo?.full_name || "").toLowerCase();
+          return !/(nur.*portfolio|portfolio.*nur|(^|\W)portfolio(\W|$))/i.test(name);
+        });
+        // build projects but allow removing items by their original index (1-based)
+        const mapped = filteredCombined.map((repo, idx) => ({ proj: buildProjectFromRepo(repo, idx), orig: idx + 1 }));
+        const afterCommentFilter = mapped.filter(({ proj, orig }) => !COMMENT_OUT_NUMS.has(orig)).map(m => m.proj);
+        if (active) setProjects(renumberProjects(afterCommentFilter));
+      } catch (err) {
+        // Keep fallback projects when GitHub request fails.
+      }
+    };
+    loadProjects();
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     const onResize = () => setWidth(window.innerWidth);
@@ -549,7 +700,37 @@ export default function Portfolio() {
     return () => window.removeEventListener('keydown', onKey);
   }, [selectedProject]);
 
+  useEffect(() => {
+    if (!viewAllOpen) return;
+    const onKey = (e) => { if (e.key === 'Escape') setViewAllOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [viewAllOpen]);
+
   const go = id => document.getElementById(id)?.scrollIntoView({ behavior:"smooth" });
+  const openFromAll = (proj) => {
+    setViewAllOpen(false);
+    setSelectedProject(proj);
+  };
+
+  const filteredProjects = projects.filter((proj) => {
+    const q = projectQuery.trim().toLowerCase();
+    if (!q) return true;
+    const hay = [
+      proj.title,
+      proj.sub,
+      proj.desc,
+      proj.type,
+      ...(proj.tags || []),
+    ].join(" ").toLowerCase();
+    return hay.includes(q);
+  });
+
+  const sortedProjects = [...filteredProjects].sort((a, b) => {
+    if (projectSort === "name") return a.title.localeCompare(b.title);
+    if (projectSort === "year-asc") return String(a.year).localeCompare(String(b.year));
+    return String(b.year).localeCompare(String(a.year));
+  });
 
   const NAV = [
     "home",
@@ -704,9 +885,9 @@ export default function Portfolio() {
           {/* descriptor row */}
           <div className="h4" style={{ display:"flex", alignItems:"center", flexWrap:"wrap", gap:0, marginBottom:50 }}>
             {[
-              {t:"AI / ML Researcher",     hi:true},
+              {t:"Research Enthusiastic ",     hi:true},
               {t:"Full-Stack Developer",    hi:false},
-              {t:"CSE @ AIUB · 3.80 GPA", hi:false},
+              {t:"CSE @ AIUB", hi:false},
             ].map((item,i) => (
               <div key={i} style={{
                 fontFamily:"'Space Mono',monospace", fontSize:10.5,
@@ -872,9 +1053,35 @@ export default function Portfolio() {
       {/* ══════════ PROJECTS ══════════ */}
       <section id="projects" style={{ padding:"108px 44px" }}>
         <div style={{ maxWidth:1100, margin:"0 auto" }}>
-          <div className="reveal" style={{ marginBottom:48 }}>
-            <div className="slbl" style={{ marginBottom:14 }}>// 04 — Projects</div>
-            <h2 style={{ fontFamily:"'Bebas Neue'", fontSize:"clamp(36px,5vw,60px)", color:"var(--text)" }}>Selected Work</h2>
+          <div className="reveal" style={{ marginBottom:18, display:"flex", alignItems:"center", justifyContent:"space-between", gap:18, flexWrap:"wrap" }}>
+            <div>
+              <div className="slbl" style={{ marginBottom:14 }}>// 04 — Projects</div>
+              <h2 style={{ fontFamily:"'Bebas Neue'", fontSize:"clamp(36px,5vw,60px)", color:"var(--text)" }}>Selected Work</h2>
+            </div>
+            <div style={{ display:'flex', gap:12, alignItems:'center' }}>
+              <input
+                id="selected-search"
+                className="viewall-input"
+                placeholder="Filter selected works"
+                value={projectQuery}
+                onChange={(e) => setProjectQuery(e.target.value)}
+                style={{ padding:'10px 12px', borderRadius:8, border:'1px solid var(--card-border)', background:'var(--bg-2)', color:'var(--text)' }}
+              />
+              <select
+                id="selected-sort"
+                className="viewall-select"
+                value={projectSort}
+                onChange={(e) => setProjectSort(e.target.value)}
+                style={{ padding:'10px 12px', borderRadius:8, border:'1px solid var(--card-border)', background:'var(--bg-2)', color:'var(--text)' }}
+              >
+                <option value="recent">Newest</option>
+                <option value="year-asc">Oldest</option>
+                <option value="name">Name (A-Z)</option>
+              </select>
+              <button className="btnO" onClick={() => setViewAllOpen(true)} aria-label="View all projects">
+                View All
+              </button>
+            </div>
           </div>
           <div
             className={`projects-marquee ${marqueePaused ? "paused" : ""}`}
@@ -886,16 +1093,16 @@ export default function Portfolio() {
           >
             <div className="projects-track">
               <div className="projects-set">
-                {PROJECTS.map((proj,i) => (
-                  <div key={`a-${proj.n}`} className="projects-item">
-                    <ProjectCard proj={proj} delay={i * .04} onView={setSelectedProject}/>
+                {sortedProjects.map((proj,i) => (
+                  <div key={`a-${i}`} className="projects-item">
+                    <ProjectCard proj={{ ...proj, n: String(i + 1).padStart(2, "0") }} delay={i * .04} onView={setSelectedProject}/>
                   </div>
                 ))}
               </div>
               <div className="projects-set" aria-hidden="true">
-                {PROJECTS.map((proj,i) => (
-                  <div key={`b-${proj.n}`} className="projects-item">
-                    <ProjectCard proj={proj} delay={i * .04} onView={setSelectedProject}/>
+                {sortedProjects.map((proj,i) => (
+                  <div key={`b-${i}`} className="projects-item">
+                    <ProjectCard proj={{ ...proj, n: String(i + 1).padStart(2, "0") }} delay={i * .04} onView={setSelectedProject}/>
                   </div>
                 ))}
               </div>
@@ -923,6 +1130,54 @@ export default function Portfolio() {
                 <a className="btnO" href={selectedProject.link} target="_blank" rel="noreferrer">View Code ↗</a>
               )}
               <button className="btnP" onClick={() => setSelectedProject(null)}><span>Close</span></button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {viewAllOpen && (
+        <div className="modal-backdrop" onClick={() => setViewAllOpen(false)}>
+          <div className="modal modal-viewall" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" aria-label="Close all projects" onClick={() => setViewAllOpen(false)}>×</button>
+            <div className="modal-meta">
+              <span>All Projects</span>
+              <span>•</span>
+              <span>{sortedProjects.length} items</span>
+            </div>
+            <h3 style={{ fontFamily:"'Bebas Neue'", fontSize:32, letterSpacing:".04em" }}>Browse Everything</h3>
+            <p>Scroll to view every project at once. Tap any card to open details.</p>
+            <div className="viewall-controls">
+              <label className="viewall-label" htmlFor="project-search">Search</label>
+              <input
+                id="project-search"
+                className="viewall-input"
+                placeholder="Search by title, tag, or type"
+                value={projectQuery}
+                onChange={(e) => setProjectQuery(e.target.value)}
+              />
+              <label className="viewall-label" htmlFor="project-sort">Sort</label>
+              <select
+                id="project-sort"
+                className="viewall-select"
+                value={projectSort}
+                onChange={(e) => setProjectSort(e.target.value)}
+              >
+                <option value="recent">Newest</option>
+                <option value="year-asc">Oldest</option>
+                <option value="name">Name (A-Z)</option>
+              </select>
+            </div>
+            <div className="viewall-scroll">
+              <div className="viewall-grid">
+                {sortedProjects.map((proj, idx) => (
+                  <div key={`all-${idx}`} className="viewall-item">
+                    <ProjectCard proj={{ ...proj, n: String(idx + 1).padStart(2, "0") }} delay={0} onView={openFromAll} />
+                  </div>
+                ))}
+              </div>
+              {sortedProjects.length === 0 && (
+                <div className="viewall-empty">No projects match your search.</div>
+              )}
             </div>
           </div>
         </div>
