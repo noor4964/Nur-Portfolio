@@ -23,6 +23,13 @@ Recommended deployment options:
  - Build assets locally or in CI (`npm run build`), then run `NODE_ENV=production RESEND_API_KEY=... npm start` on your server.
  - For Docker, create a Dockerfile that runs `npm ci`, `npm run build`, and `npm start`.
 
+4) Vercel (recommended for single-repo frontend+API)
+ - This repo now contains a Vercel serverless function at `api/contact.js` and a `vercel.json`.
+ - On Vercel, create a new project from this GitHub repo.
+ - In Vercel Project Settings > Environment Variables, add `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `CONTACT_TO_EMAIL`, and `WEBSITE_NAME`.
+ - Vercel will run `npm run build` and publish the `dist` directory as the static site; serverless functions are available at `/api/contact`.
+ - Test the contact form in production by visiting your site and submitting the form.
+
 Post-deploy checks:
 - Visit your app URL and test the contact form.
 - Confirm server logs show successful email sends and that `RESEND_API_KEY` is present in environment.
