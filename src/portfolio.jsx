@@ -1,4 +1,31 @@
 import { useState, useEffect, useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+
+import {
+  SiPython,
+  SiTypescript,
+  SiJavascript,
+  SiPhp,
+  SiPytorch,
+  SiTensorflow,
+  SiReact,
+  SiNextdotjs,
+  SiNodedotjs,
+  SiNestjs,
+  SiLaravel,
+  SiGraphql,
+  SiPostgresql,
+  SiFirebase,
+  SiMysql,
+  SiMongodb,
+  SiDocker,
+  SiGit,
+  SiLinux,
+  SiFigma,
+  SiPostman,
+  SiGooglecolab,
+  SiKaggle,
+} from "react-icons/si";
 
 /* ─────────────────────────────────────────────
    GLOBAL CSS  (fonts + keyframes + utilities)
@@ -208,11 +235,44 @@ html{scroll-behavior:smooth;}
 .stack-items{display:flex;flex-wrap:wrap;gap:8px;}
 .stack-items span{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted-2);padding:4px 8px;border:1px solid var(--card-border);background:var(--bg-2);}
 
+/* ── technical arsenal horizon layout ── */
+.skill-horizon{position:relative;overflow:hidden;background:linear-gradient(180deg,var(--bg-2),var(--bg));}
+.skill-horizon-grid{position:absolute;inset:0;pointer-events:none;opacity:.32;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:60px 60px;}
+.skill-horizon-glow{position:absolute;border-radius:50%;filter:blur(24px);pointer-events:none;opacity:.45;}
+.skill-horizon-glow-a{width:420px;height:420px;left:-140px;top:18%;background:radial-gradient(circle,rgba(255,255,255,.08),transparent 68%);}
+.skill-horizon-glow-b{width:360px;height:360px;right:-120px;bottom:8%;background:radial-gradient(circle,rgba(255,255,255,.05),transparent 68%);}
+.skill-sidebar{position:sticky;left:30px;top:50vh;transform:translateY(-50%);z-index:20;display:flex;flex-direction:column;gap:14px;pointer-events:none;}
+.skill-sidebar-item{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.15em;color:var(--muted);text-transform:uppercase;opacity:.9;}
+.skill-panel{height:100vh;position:relative;perspective:1400px;}
+.skill-panel-sticky{position:sticky;top:0;height:100vh;display:flex;align-items:center;justify-content:center;padding:0 44px;overflow:hidden;}
+.skill-panel-card{position:relative;width:100%;max-width:1100px;padding:clamp(28px,4vw,56px);border:1px solid var(--card-border);border-radius:24px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015));box-shadow:0 28px 70px rgba(0,0,0,.2);backdrop-filter:blur(14px);transform-origin:center center;overflow:hidden;}
+.skill-panel-card::before{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(135deg,rgba(255,255,255,.06),transparent 35%,transparent 65%,rgba(255,255,255,.03));}
+.skill-panel-card::after{content:'';position:absolute;inset:auto 0 0 0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.4;}
+.skill-panel-index{position:absolute;inset:26px 26px auto auto;font-family:'Bebas Neue';font-size:clamp(84px,12vw,180px);line-height:1;color:rgba(255,255,255,.05);pointer-events:none;}
+.skill-panel-meta{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.22em;text-transform:uppercase;margin-bottom:16px;}
+.skill-panel-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,7vw,100px);color:var(--text);margin-bottom:38px;line-height:.92;}
+.skill-panel-grid{display:flex;flex-wrap:wrap;gap:26px;justify-content:center;max-width:1000px;margin:0 auto;}
+.skill-item{display:flex;flex-direction:column;align-items:center;gap:12px;min-width:92px;text-align:center;}
+.skill-icon-shell{width:74px;height:74px;border-radius:22px;display:flex;align-items:center;justify-content:center;border:1px solid var(--card-border);background:rgba(255,255,255,.02);box-shadow:inset 0 1px 0 rgba(255,255,255,.04);}
+.skill-icon-fallback{width:34px;height:34px;border-radius:50%;border:1px solid var(--muted-2);opacity:.8;}
+.skill-item-label{color:var(--text);font-size:14px;letter-spacing:.02em;}
+
 @media (max-width:1100px){
   .stack-grid{grid-template-columns:repeat(3,1fr);}
 }
 @media (max-width:680px){
   .stack-grid{grid-template-columns:1fr;}
+}
+@media (max-width:900px){
+  .skill-sidebar{display:none;}
+  .skill-panel-sticky{padding:0 18px;}
+  .skill-panel-grid{gap:18px;}
+  .skill-item{min-width:84px;}
+  .skill-icon-shell{width:64px;height:64px;}
+}
+@media (max-width:560px){
+  .skill-panel-title{margin-bottom:28px;}
+  .skill-panel-card{border-radius:18px;}
 }
 `;
 
@@ -418,6 +478,32 @@ const STACK = [
   { title:"Ops", items:["Docker","Linux","Git","CI/CD"] },
 ];
 
+const ICONS = {
+  Python: SiPython,
+  TypeScript: SiTypescript,
+  JavaScript: SiJavascript,
+  PHP: SiPhp,
+  PyTorch: SiPytorch,
+  TensorFlow: SiTensorflow,
+  React: SiReact,
+  "Next.js": SiNextdotjs,
+  "Node.js": SiNodedotjs,
+  NestJS: SiNestjs,
+  Laravel: SiLaravel,
+  GraphQL: SiGraphql,
+  PostgreSQL: SiPostgresql,
+  Firebase: SiFirebase,
+  MySQL: SiMysql,
+  MongoDB: SiMongodb,
+  Docker: SiDocker,
+  Git: SiGit,
+  Linux: SiLinux,
+  Figma: SiFigma,
+  Postman: SiPostman,
+  "Google Colab": SiGooglecolab,
+  Kaggle: SiKaggle,
+};
+
 
 /* ─────────────────────────────────────────────
    HOOKS
@@ -542,6 +628,92 @@ function ProjectCard({ proj, delay, onView }) {
   );
 }
 
+function FloatingIcon({ Icon, delay = 0 }) {
+  return (
+    <motion.div
+      animate={{ y: [0, -14, 0], rotate: [0, 2, -2, 0] }}
+      transition={{ duration: 4 + delay, repeat: Infinity, ease: "easeInOut" }}
+      style={{ fontSize: "clamp(28px,4vw,60px)", color: "var(--text)" }}
+    >
+      <Icon />
+    </motion.div>
+  );
+}
+
+function SkillPanel({ category, items, index, total }) {
+  const ref = useRef(null);
+
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+
+  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.72, 1, 0.76]);
+  const opacity = useTransform(scrollYProgress, [0, 0.18, 0.82, 1], [0, 1, 1, 0]);
+  const y = useTransform(scrollYProgress, [0, 1], [180, -180]);
+  const rotateX = useTransform(scrollYProgress, [0, 1], [28, -24]);
+
+  return (
+    <section ref={ref} className="skill-panel">
+      <div className="skill-panel-sticky">
+        <motion.div
+          className="skill-panel-card"
+          style={{ scale, opacity, y, rotateX, transformStyle: "preserve-3d" }}
+        >
+          <div className="skill-panel-index">{String(index + 1).padStart(2, "0")}</div>
+          <div className="skill-panel-meta">CATEGORY {index + 1} / {total}</div>
+          <h2 className="skill-panel-title">{category}</h2>
+          <div className="skill-panel-grid">
+            {items.map((item, i) => {
+              const Icon = ICONS[item];
+              return (
+                <motion.div
+                  key={item}
+                  whileHover={{ scale: 1.08, y: -4 }}
+                  className="skill-item"
+                >
+                  <div className="skill-icon-shell">
+                    {Icon ? <FloatingIcon Icon={Icon} delay={i * 0.18} /> : <div className="skill-icon-fallback" />}
+                  </div>
+                  <span className="skill-item-label">{item}</span>
+                </motion.div>
+              );
+            })}
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+function HorizonSkills() {
+  return (
+    <section className="skill-horizon">
+      <div className="skill-horizon-grid" aria-hidden="true" />
+      <div className="skill-horizon-glow skill-horizon-glow-a" aria-hidden="true" />
+      <div className="skill-horizon-glow skill-horizon-glow-b" aria-hidden="true" />
+
+      <div className="skill-sidebar" aria-hidden="true">
+        {SKILLS.map((s, i) => (
+          <div key={s.cat} className="skill-sidebar-item">
+            {String(i + 1).padStart(2, "0")} {s.cat}
+          </div>
+        ))}
+      </div>
+
+      {SKILLS.map((skill, index) => (
+        <SkillPanel
+          key={skill.cat}
+          category={skill.cat}
+          items={skill.items}
+          index={index}
+          total={SKILLS.length}
+        />
+      ))}
+    </section>
+  );
+}
+
 /* ─────────────────────────────────────────────
    MAIN COMPONENT
 ───────────────────────────────────────────── */
@@ -553,6 +725,8 @@ export default function Portfolio() {
   const [heroMy,   setHeroMy]   = useState(0);
   const [form,     setForm]     = useState({ name:"", email:"", msg:"" });
   const [sent,     setSent]     = useState(false);
+  const [sending,  setSending]  = useState(false);
+  const [contactError, setContactError] = useState("");
   const [errors,   setErrors]   = useState({ email:false, msg:false });
   const [width, setWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   const [mounted, setMounted] = useState(false);
@@ -711,6 +885,43 @@ export default function Portfolio() {
   const openFromAll = (proj) => {
     setViewAllOpen(false);
     setSelectedProject(proj);
+  };
+
+  const submitContact = async () => {
+    const name = form.name.trim();
+    const email = form.email.trim();
+    const message = form.msg.trim();
+    const emailValid = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+    const msgValid = message.length > 4;
+
+    if (!emailValid || !msgValid) {
+      setErrors({ email: !emailValid, msg: !msgValid });
+      return;
+    }
+
+    setSending(true);
+    setContactError("");
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, message }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload?.error || "Failed to send message.");
+      }
+
+      setSent(true);
+      setForm({ name: "", email: "", msg: "" });
+      setErrors({ email: false, msg: false });
+    } catch (error) {
+      setContactError(error instanceof Error ? error.message : "Something went wrong.");
+    } finally {
+      setSending(false);
+    }
   };
 
   const filteredProjects = projects.filter((proj) => {
@@ -962,7 +1173,7 @@ export default function Portfolio() {
                 <span style={{ color:"transparent", WebkitTextStroke:"1px var(--card-border)" }}>Intelligence</span>
               </h2>
               <p style={{ color:"var(--muted)", lineHeight:1.88, fontSize:13.5, marginBottom:16 }}>
-                Final-year Computer Science student at AIUB with published research in deep learning and IoT. I design, implement, and evaluate machine learning pipelines end-to-end — from raw dataset curation to model benchmarking.
+                Computer Science student with published research in deep learning and IoT. I design, implement, and evaluate machine learning pipelines end-to-end — from raw dataset curation to model benchmarking.
               </p>
               <p style={{ color:"var(--muted-2)", lineHeight:1.88, fontSize:13.5, marginBottom:32 }}>
                 Co-founder of Algo Tech IT, where I lead technical architecture, project delivery, and developer mentorship. Currently completing a thesis on deepfake detection using a multi-branch CV architecture (MobileNetV3 + ViT + gaze estimation).
@@ -998,10 +1209,10 @@ export default function Portfolio() {
                   <div style={{ display:"flex", gap:12 }}>
                     <div className="tdot"/>
                     <div>
-                      <div style={{ fontWeight:600, fontSize:13, color:"var(--text)", marginBottom:4 }}>B.Sc. CSE</div>
-                      <div style={{ fontFamily:"'Space Mono',monospace", fontSize:9.5, color:"var(--muted)", marginBottom:6 }}>AIUB · 2021–2025</div>
-                      <div style={{ fontSize:12, color:"var(--muted-2)" }}>Dean's List · 3.80 GPA</div>
-                      <div style={{ fontSize:11.5, color:"var(--muted-2)", marginTop:3 }}>Thesis: Deepfake Detection CV</div>
+                      <div style={{ fontWeight:600, fontSize:13, color:"var(--text)", marginBottom:4 }}>B.Sc. Computer Science and Engineering</div>
+                      <div style={{ fontFamily:"'Space Mono',monospace", fontSize:9.5, color:"var(--muted)", marginBottom:6 }}>AIUB · 2022–2026</div>
+                      <div style={{ fontSize:12, color:"var(--muted-2)" }}>·CGPA 3.79 </div>
+                      <div style={{ fontSize:11.5, color:"var(--muted-2)", marginTop:3 }}>Thesis: DeepDetect: Deepfake Detection – Hybrid EfficientNet + ViT </div>
                     </div>
                   </div>
                 </div>
@@ -1011,8 +1222,8 @@ export default function Portfolio() {
                   <div style={{ display:"flex", gap:12 }}>
                     <div className="tdot"/>
                     <div>
-                      <div style={{ fontWeight:600, fontSize:13, color:"var(--text)", marginBottom:4 }}>Co-Founder & Dev</div>
-                      <div style={{ fontFamily:"'Space Mono',monospace", fontSize:9.5, color:"var(--muted)", marginBottom:6 }}>Algo Tech IT · 2023–Now</div>
+                      <div style={{ fontWeight:600, fontSize:13, color:"var(--text)", marginBottom:4 }}>Co-Founder & CTO</div>
+                      <div style={{ fontFamily:"'Space Mono',monospace", fontSize:9.5, color:"var(--muted)", marginBottom:6 }}>Algo Tech IT · 2024–Now</div>
                       <div style={{ fontSize:12, color:"var(--muted-2)" }}>Web & Software Solutions</div>
                       <div style={{ fontSize:11.5, color:"var(--muted-2)", marginTop:3 }}>Tech lead · Team mentorship</div>
                     </div>
@@ -1025,29 +1236,15 @@ export default function Portfolio() {
       </section>
 
       {/* ══════════ SKILLS ══════════ */}
-      <section id="skills" style={{ borderTop:"1px solid var(--card-border)", borderBottom:"1px solid var(--card-border)", background:"var(--bg-2)", padding:"80px 44px" }}>
-        <div style={{ maxWidth:1100, margin:"0 auto" }}>
-          <div className="reveal" style={{ marginBottom:48 }}>
-            <div className="slbl" style={{ marginBottom:14 }}>// 03 — Skills</div>
-            <h2 style={{ fontFamily:"'Bebas Neue'", fontSize:"clamp(36px,5vw,60px)", color:"var(--text)" }}>Technical Arsenal</h2>
-          </div>
-          <div>
-            {SKILLS.map(({cat,items},i) => (
-              <div key={cat} className="reveal" style={{
-                display:"grid", gridTemplateColumns:"138px 1fr", gap:24,
-                alignItems:"center", padding:"20px 0",
-                borderBottom: i < SKILLS.length-1 ? "1px solid var(--card-border)" : "none",
-              }}>
-                <div style={{ fontFamily:"'Space Mono',monospace", fontSize:9.5, color:"var(--muted)", letterSpacing:".14em" }}>
-                  {cat.toUpperCase()}
-                </div>
-                <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
-                  {items.map(s => <span key={s} className="sp">{s}</span>)}
-                </div>
-              </div>
-            ))}
-          </div>
+      <section id="skills">
+        <div className="reveal" style={{ padding:"80px 44px 0", maxWidth:1100, margin:"0 auto" }}>
+          <div className="slbl" style={{ marginBottom:14 }}>// 03 — Skills</div>
+          <h2 style={{ fontFamily:"'Bebas Neue'", fontSize:"clamp(36px,5vw,60px)", color:"var(--text)" }}>Technical Arsenal</h2>
+          <p style={{ maxWidth:680, marginTop:16, color:"var(--muted-2)", lineHeight:1.8, fontSize:13.5 }}>
+            A scroll-driven view of the tools, frameworks, and technologies that shape my work across software, AI, and product builds.
+          </p>
         </div>
+        <HorizonSkills />
       </section>
 
       {/* ══════════ PROJECTS ══════════ */}
@@ -1266,24 +1463,16 @@ export default function Portfolio() {
                     value={form.msg}
                     onChange={e => { setForm(p => ({...p, msg:e.target.value})); setErrors(s=>({...s,msg:false})); }}
                   />
+                  {contactError ? (
+                    <div style={{ color:"#ff8f8f", fontSize:12.5, lineHeight:1.6 }}>{contactError}</div>
+                  ) : null}
                   <button
                     className="btnP"
-                    style={{ width:"100%", justifyContent:"center" }}
-                    onClick={() => {
-                      const emailValid = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email);
-                      const msgValid = form.msg.trim().length > 4;
-                      if(!emailValid || !msgValid){
-                        setErrors({ email:!emailValid, msg:!msgValid });
-                        return;
-                      }
-                      // open mail client and mark sent state
-                      const subject = encodeURIComponent('Portfolio contact from ' + (form.name||'Website'));
-                      const body = encodeURIComponent(form.msg + '\n\n— ' + (form.name || ''));
-                      window.location.href = `mailto:noor.alam2002@outlook.com?subject=${subject}&body=${body}`;
-                      setSent(true);
-                    }}
+                    style={{ width:"100%", justifyContent:"center", opacity: sending ? .82 : 1, cursor: sending ? "wait" : "pointer" }}
+                    onClick={submitContact}
+                    disabled={sending}
                   >
-                    <span>Send Message</span>
+                    <span>{sending ? "Sending..." : "Send Message"}</span>
                   </button>
                 </div>
               )}
