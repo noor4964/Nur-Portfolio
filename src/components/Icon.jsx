@@ -18,6 +18,7 @@ import {
   FiCheck,
   FiMenu,
   FiX,
+  FiHome,
 } from "react-icons/fi";
 import {
   SiPython,
@@ -71,6 +72,7 @@ const REGISTRY = {
   check: FiCheck,
   menu: FiMenu,
   close: FiX,
+  home: FiHome,
   brain: FiCpu,
   code: FiCode,
   research: FiBookOpen,

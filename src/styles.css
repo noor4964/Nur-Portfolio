@@ -14,6 +14,7 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 84px;
   color-scheme: dark;
   --bg: #08090d;
   --panel: rgba(255, 255, 255, 0.04);
@@ -137,6 +138,7 @@ button {
 .page {
   animation: pageIn 0.35s ease both;
   min-height: calc(100vh - 220px);
+  min-height: calc(100svh - 220px);
 }
 
 @keyframes pageIn {
@@ -274,12 +276,6 @@ button {
   justify-content: center;
   padding: 0 16px;
   pointer-events: none;
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s;
-}
-.site-header.nav-hidden {
-  transform: translateY(calc(-100% - 20px));
-  visibility: hidden;
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s 0.4s;
 }
 
 .nav-shell {
@@ -350,6 +346,22 @@ button {
   text-transform: uppercase;
   text-decoration: none;
   color: var(--text);
+  white-space: nowrap;
+}
+
+/* mobile-only home icon button (replaces the brand text) */
+.nav-home {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  color: var(--text);
+  text-decoration: none;
+}
+.nav-home:hover {
+  background: var(--surface-2);
 }
 
 .nav-links {
@@ -414,6 +426,7 @@ button {
   color: var(--text-2);
   text-decoration: none;
   border-radius: 999px;
+  white-space: nowrap;
   transition: color 0.2s ease, background 0.2s ease;
 }
 .nav-link:hover {
@@ -895,7 +908,7 @@ button {
 /* ── skills ── */
 .skills-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr));
   gap: 1px;
   background: var(--border);
   border: 1px solid var(--border);
@@ -1242,6 +1255,7 @@ button {
   font-size: 15.5px;
   color: var(--text);
   text-decoration: none;
+  overflow-wrap: anywhere;
 }
 a.info-value:hover {
   text-decoration: underline;
@@ -1452,6 +1466,7 @@ a.info-value:hover {
   font-weight: 600;
   line-height: 1;
   text-decoration: none;
+  white-space: nowrap;
   background-color: color-mix(in srgb, var(--c-glass) 25%, transparent);
   -webkit-backdrop-filter: blur(8px) saturate(150%);
   backdrop-filter: blur(8px) saturate(150%);
@@ -1584,6 +1599,10 @@ a.info-value:hover {
 }
 
 @media (max-width: 768px) {
+  body {
+    /* fixed attachment janks/ignores on mobile Safari */
+    background-attachment: scroll;
+  }
   .section {
     padding: 72px 0;
   }
@@ -1591,11 +1610,30 @@ a.info-value:hover {
     padding: 88px 0;
   }
   .site-header {
-    top: 10px;
+    /* mobile: floating bottom bar */
+    top: auto;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
     padding: 0 12px;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s;
+  }
+  .site-header.nav-hidden {
+    transform: translateY(calc(100% + 24px));
+    visibility: hidden;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s 0.35s;
   }
   .nav-shell {
     padding: 0;
+  }
+  .nav-brand {
+    display: none;
+  }
+  .nav-home {
+    display: inline-flex;
+    margin-right: 4px;
+  }
+  /* displacement filter is GPU-heavy on phones — keep blur only */
+  .glass-filter {
+    filter: none;
   }
   .glass-content {
     padding: 8px 8px 8px 18px;
@@ -1616,6 +1654,9 @@ a.info-value:hover {
     padding: 8px 13px;
     font-size: 12.5px;
   }
+  .case-meta-row {
+    gap: 20px 32px;
+  }
   .case-nav {
     grid-template-columns: 1fr;
   }
@@ -1625,18 +1666,181 @@ a.info-value:hover {
   .form-card {
     padding: 26px 20px;
   }
+  /* keep footer content clear of the floating bottom bar */
+  .site-footer {
+    padding-bottom: 104px;
+  }
+  .about-portrait {
+    max-width: 440px;
+  }
+  .copy-btn {
+    padding: 8px 12px;
+  }
+
+  /* ── mobile type scale (precise px, replaces clamp minimums) ── */
+  .hero h1 {
+    font-size: 40px;
+    line-height: 1.06;
+  }
+  .hero-philosophy {
+    font-size: 18px;
+  }
+  .section-title {
+    font-size: 28px;
+  }
+  .section-desc {
+    font-size: 15px;
+  }
+  .stat-num {
+    font-size: 30px;
+  }
+  .feature-body h3 {
+    font-size: 24px;
+  }
+  .case-title {
+    font-size: 34px;
+    line-height: 1.08;
+  }
+  .case-body {
+    font-size: 16.5px;
+  }
+  .prose p {
+    font-size: 16px;
+    line-height: 1.75;
+  }
+  .prose p:first-child {
+    font-size: 18.5px;
+    line-height: 1.6;
+  }
+  .pub-title {
+    font-size: 16.5px;
+  }
+  .tl-role {
+    font-size: 16.5px;
+  }
+
+  /* ── mobile forms: 16px controls stop iOS focus auto-zoom ── */
+  .input,
+  .textarea,
+  .search-input,
+  .sort-select {
+    font-size: 16px;
+    padding: 12px 14px;
+  }
+  .filter-chip {
+    padding: 10px 16px;
+  }
+
+  /* ── Work page ── */
+  /* filters become a horizontal swipe rail instead of tall wrap rows */
+  .chip-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 28px;
+  }
+  .chip-row::-webkit-scrollbar {
+    display: none;
+  }
+  .filter-chip {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  /* search and sort each get their own full-width row */
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .search-input {
+    min-width: 0;
+    width: 100%;
+  }
+  .sort-select {
+    width: 100%;
+  }
+  .feature-stack {
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  /* ── project cards ── */
+  .project-grid {
+    gap: 32px;
+  }
+  .pc-media {
+    /* short fixed band instead of desktop's tall 4/3 box */
+    aspect-ratio: auto;
+    height: clamp(140px, 40vw, 190px);
+    border-radius: 6px;
+  }
+  .feature-media {
+    aspect-ratio: auto;
+    height: clamp(150px, 46vw, 230px);
+  }
+  .pc-caption {
+    padding-top: 8px;
+  }
+  .pc-caption-row {
+    gap: 6px 10px;
+    flex-wrap: wrap;
+  }
+  .pc-title {
+    font-size: 15px;
+  }
+  .pc-year {
+    font-size: 11px;
+  }
+  .pc-role {
+    margin-top: 2px;
+    font-size: 12px;
+  }
+  .pc-summary {
+    margin-top: 5px;
+    font-size: 13px;
+    line-height: 1.55;
+  }
 }
 
 @media (max-width: 480px) {
   .container {
     padding: 0 20px;
   }
-  .nav-brand {
-    font-size: 12.5px;
-  }
   .nav-link {
     font-size: 12px;
     padding: 8px 8px;
+  }
+  /* tighter type for narrow phones */
+  .hero h1 {
+    font-size: 34px;
+  }
+  .section-title {
+    font-size: 26px;
+  }
+  .case-title {
+    font-size: 28px;
+  }
+  .stat-num {
+    font-size: 26px;
+  }
+  .notfound .code {
+    font-size: 56px;
+  }
+  .btn {
+    padding: 13px 22px;
+  }
+  /* project cards: tighter rhythm, summaries capped at 2 lines */
+  .project-grid {
+    gap: 26px;
+  }
+  .pc-media {
+    border-radius: 5px;
+  }
+  .pc-summary {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
   .nav-cta {
     margin-left: 10px;
@@ -1652,6 +1856,14 @@ a.info-value:hover {
   }
   .stat-card:first-child {
     border-top: none;
+  }
+}
+
+/* ultra-narrow: drop the résumé pill so brand + links fit the glass bar
+   (résumé stays reachable from footer, hero and contact page) */
+@media (max-width: 420px) {
+  .nav-cta {
+    display: none;
   }
 }
 

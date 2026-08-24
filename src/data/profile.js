@@ -40,6 +40,12 @@ export const EDUCATION = [
 
 export const EXPERIENCE = [
   {
+    period: "Aug 2026 — Present",
+    role: "Software Developer (Intern)",
+    org: "Standard Islami Bank PLC · Information Technology Department",
+    desc: "Started an internship in the bank's IT department as a Software Developer, contributing to internal software development and day-to-day technology operations.",
+  },
+  {
     period: "2024 — Present",
     role: "Co-Founder & CTO",
     org: "Algo Tech IT · Web & Software Solutions",

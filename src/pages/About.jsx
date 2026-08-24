@@ -50,8 +50,8 @@ export default function About() {
 
               <div className="contact-note" style={{ marginTop: 20 }}>
                 <strong style={{ display: "block", marginBottom: 6 }}>Currently</strong>
-                Finishing my B.Sc. thesis on deepfake detection and open to full-time roles,
-                internships and research collaborations. Reach me via{" "}
+                Interning as a Software Developer in the Information Technology
+                department at <strong>Standard Islami Bank PLC</strong>. Reach me via{" "}
                 <a href={`mailto:${PROFILE.email}`} className="info-value" style={{ fontSize: "inherit" }}>
                   email
                 </a>{" "}

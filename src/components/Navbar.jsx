@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
+import Icon from "./Icon";
 import { PROFILE } from "../data/profile";
 
 const NAV_ITEMS = [
@@ -50,7 +51,7 @@ export default function Navbar() {
       location.pathname.startsWith(item.to + "/")
   );
 
-  /* hide when scrolling down, reveal when scrolling up */
+  /* hide when scrolling down, reveal when scrolling up (mobile only — CSS gates it) */
   useEffect(() => {
     let lastY = window.scrollY;
     let ticking = false;
@@ -105,6 +106,9 @@ export default function Navbar() {
         <div className="glass-content">
           <Link to="/" className="nav-brand">
             {PROFILE.brand}
+          </Link>
+          <Link to="/" className="nav-home" aria-label="Home">
+            <Icon name="home" size={17} />
           </Link>
 
           <div className="nav-links" ref={listRef}>
