@@ -1,8 +1,7 @@
 /* ════════════════════════════════════════════════════════════
    SK. Nur Alam — Portfolio
-   Text-first editorial system. Flat surfaces, 1px rules,
-   solid charcoal type on an off-white canvas. No gradients,
-   no shadows, no dark mode.
+   Dark ambient canvas with drifting color fields, built for
+   liquid glass: translucent panels, 1px light rules, glass nav.
    ════════════════════════════════════════════════════════════ */
 
 *,
@@ -15,21 +14,28 @@
 
 html {
   scroll-behavior: smooth;
-  --bg: #fafafa;
-  --surface: #ffffff;
-  --surface-2: #f4f4f5;
-  --text: #18181b;
-  --text-2: #3f3f46;
-  --muted: #71717a;
-  --border: #e4e4e7;
-  --border-strong: #d4d4d8;
-  --ink: #18181b; /* button fill */
-  --ink-hover: #27272a;
-  --paper: #ffffff; /* button text */
-  --error: #b91c1c;
-  --ok: #3f6212;
+  color-scheme: dark;
+  --bg: #08090d;
+  --panel: rgba(255, 255, 255, 0.04);
+  --surface: rgba(255, 255, 255, 0.05);
+  --surface-2: rgba(255, 255, 255, 0.09);
+  --text: #eef0f4;
+  --text-2: #b7bdc9;
+  --muted: #8b91a0;
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --ink: #eef0f4; /* button fill */
+  --ink-hover: #ffffff;
+  --paper: #0a0b10; /* button text */
+  --error: #ff8585;
+  --ok: #5ee38f;
   --font-body: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", monospace;
+
+  /* liquid-glass reflex tokens (from the Apple switcher technique) */
+  --glass-reflex-dark: 1;
+  --glass-reflex-light: 1.2;
+  --c-glass: #bbbbbc;
 }
 
 html,
@@ -39,7 +45,12 @@ body,
 }
 
 body {
-  background: var(--bg);
+  background:
+    radial-gradient(circle at 15% 20%, rgba(120, 160, 255, 0.18), transparent 30%),
+    radial-gradient(circle at 85% 25%, rgba(180, 120, 255, 0.14), transparent 30%),
+    radial-gradient(circle at 60% 85%, rgba(80, 220, 190, 0.1), transparent 30%),
+    var(--bg);
+  background-attachment: fixed;
   color: var(--text);
   font-family: var(--font-body);
   font-size: 16px;
@@ -49,8 +60,8 @@ body {
 }
 
 ::selection {
-  background: var(--text);
-  color: var(--bg);
+  background: var(--ink);
+  color: var(--paper);
 }
 
 ::-webkit-scrollbar {
@@ -254,20 +265,81 @@ button {
 
 /* ── header / nav ── */
 .site-header {
-  position: sticky;
-  top: 0;
+  position: fixed;
+  top: 14px;
+  left: 0;
+  right: 0;
   z-index: 1000;
-  background: rgba(250, 250, 250, 0.92);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: center;
+  padding: 0 16px;
+  pointer-events: none;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s;
+}
+.site-header.nav-hidden {
+  transform: translateY(calc(-100% - 20px));
+  visibility: hidden;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s 0.4s;
 }
 
-.nav {
+.nav-shell {
+  pointer-events: auto;
+  width: 100%;
+  max-width: 1160px;
+  border: 1px solid var(--border);
+}
+
+/* ── liquid glass layers (adapted from the Apple-style glass technique) ── */
+.lg-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+.glass-container {
+  position: relative;
+  background: transparent;
+  border-radius: 999px;
+  overflow: hidden;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+
+.glass-filter {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  backdrop-filter: blur(4px) saturate(150%);
+  -webkit-backdrop-filter: blur(4px) saturate(150%);
+  filter: url(#lg-dist);
+  isolation: isolate;
+}
+
+.glass-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: color-mix(in srgb, var(--c-glass) 14%, transparent);
+}
+
+.glass-specular {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  overflow: hidden;
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.75),
+    inset 0 0 6px rgba(255, 255, 255, 0.5);
+}
+
+.glass-content {
+  position: relative;
+  z-index: 3;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 72px;
+  width: 100%;
+  padding: 10px 12px 10px 24px;
 }
 
 .nav-brand {
@@ -281,27 +353,76 @@ button {
 }
 
 .nav-links {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 34px;
+  gap: 6px;
+}
+
+/* sliding glass thumb behind the active link (switcher style) */
+.nav-thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition:
+    transform 400ms cubic-bezier(1, 0, 0.4, 1),
+    width 400ms cubic-bezier(1, 0, 0.4, 1),
+    opacity 200ms ease;
+}
+.nav-thumb.ready {
+  opacity: 1;
+}
+.nav-thumb-inner {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 99em;
+  background-color: color-mix(in srgb, var(--c-glass) 36%, transparent);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 2px 1px 0px -1px color-mix(in srgb, rgba(255, 255, 255, 0.9) calc(var(--glass-reflex-light) * 90%), transparent),
+    inset -1.5px -1px 0px -1px color-mix(in srgb, rgba(255, 255, 255, 0.9) calc(var(--glass-reflex-light) * 80%), transparent),
+    inset -2px -6px 1px -5px color-mix(in srgb, rgba(255, 255, 255, 0.9) calc(var(--glass-reflex-light) * 60%), transparent),
+    inset -1px 2px 3px -1px color-mix(in srgb, var(--c-glass) calc(var(--glass-reflex-dark) * 20%), transparent),
+    inset 0px -4px 1px -2px color-mix(in srgb, var(--c-glass) calc(var(--glass-reflex-dark) * 10%), transparent),
+    0px 3px 6px 0px color-mix(in srgb, #18181b calc(var(--glass-reflex-dark) * 8%), transparent);
+  animation: navThumbPop 440ms ease;
+}
+
+@keyframes navThumbPop {
+  0% {
+    scale: 1 1;
+  }
+  50% {
+    scale: 1.12 1;
+  }
+  100% {
+    scale: 1 1;
+  }
 }
 
 .nav-link {
-  font-size: 14.5px;
+  position: relative;
+  z-index: 1;
+  padding: 8px 14px;
+  font-size: 14px;
   font-weight: 500;
-  color: var(--muted);
+  color: var(--text-2);
   text-decoration: none;
-  letter-spacing: -0.01em;
-  transition: color 0.15s ease;
+  border-radius: 999px;
+  transition: color 0.2s ease, background 0.2s ease;
 }
 .nav-link:hover {
   color: var(--text);
+  background: var(--surface-2);
 }
 .nav-link.active {
   color: var(--text);
-  text-decoration: underline;
-  text-underline-offset: 6px;
-  text-decoration-thickness: 1.5px;
+  font-weight: 600;
 }
 
 /* ── hero ── */
@@ -373,7 +494,7 @@ button {
 .stat-card {
   padding: 32px 28px;
   border-left: 1px solid var(--border);
-  background: var(--bg);
+  background: var(--panel);
 }
 .stat-card:first-child {
   border-left: none;
@@ -432,7 +553,7 @@ button {
   transition: background 0.2s ease;
 }
 .project-card:hover .pc-media {
-  background: #ededf0;
+  background: rgba(255, 255, 255, 0.12);
 }
 .pc-media img {
   width: 100%;
@@ -713,7 +834,7 @@ button {
   margin-top: 56px;
 }
 .do-card {
-  background: var(--bg);
+  background: var(--panel);
   padding: 28px 26px;
 }
 .do-num {
@@ -780,7 +901,7 @@ button {
   border: 1px solid var(--border);
 }
 .skill-group {
-  background: var(--bg);
+  background: var(--panel);
   padding: 28px;
 }
 .skill-group-head {
@@ -1033,7 +1154,7 @@ button {
   max-width: 720px;
 }
 .metric-grid .stat-card {
-  background: var(--bg);
+  background: var(--panel);
 }
 
 .stack-cloud {
@@ -1063,7 +1184,7 @@ button {
 }
 .case-nav a {
   display: block;
-  background: var(--bg);
+  background: var(--panel);
   padding: 32px 28px;
   text-decoration: none;
   transition: background 0.15s ease;
@@ -1153,7 +1274,7 @@ a.info-value:hover {
   padding: 13px 15px;
   border-radius: 4px;
   border: 1px solid var(--border-strong);
-  background: var(--bg);
+  background: var(--surface);
   color: var(--text);
   font-family: var(--font-body);
   font-size: 15px;
@@ -1206,7 +1327,7 @@ a.info-value:hover {
 .site-footer {
   border-top: 1px solid var(--border);
   padding: 32px 0;
-  background: var(--bg);
+  background: transparent;
 }
 .footer-inner {
   display: flex;
@@ -1319,22 +1440,36 @@ a.info-value:hover {
   padding: 12px 2px;
 }
 
-/* ── nav résumé button ── */
+/* ── nav résumé button (liquid glass) ── */
 .nav-cta {
   display: inline-flex;
   align-items: center;
+  margin-left: 28px;
   padding: 9px 16px;
-  background: var(--ink);
-  color: var(--paper);
+  border-radius: 99em;
+  color: var(--text);
   font-size: 13px;
   font-weight: 600;
   line-height: 1;
-  border-radius: 4px;
   text-decoration: none;
-  transition: background 0.15s ease;
+  background-color: color-mix(in srgb, var(--c-glass) 25%, transparent);
+  -webkit-backdrop-filter: blur(8px) saturate(150%);
+  backdrop-filter: blur(8px) saturate(150%);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, rgba(255, 255, 255, 0.9) calc(var(--glass-reflex-light) * 10%), transparent),
+    inset 1.8px 3px 0px -2px color-mix(in srgb, rgba(255, 255, 255, 0.9) calc(var(--glass-reflex-light) * 90%), transparent),
+    inset -2px -2px 0px -2px color-mix(in srgb, rgba(255, 255, 255, 0.9) calc(var(--glass-reflex-light) * 80%), transparent),
+    inset -3px -8px 1px -6px color-mix(in srgb, rgba(255, 255, 255, 0.9) calc(var(--glass-reflex-light) * 60%), transparent),
+    inset -0.3px -1px 4px 0px color-mix(in srgb, var(--c-glass) calc(var(--glass-reflex-dark) * 12%), transparent),
+    inset -1.5px 2.5px 0px -2px color-mix(in srgb, var(--c-glass) calc(var(--glass-reflex-dark) * 20%), transparent),
+    inset 0px 3px 4px -2px color-mix(in srgb, var(--c-glass) calc(var(--glass-reflex-dark) * 20%), transparent),
+    inset 2px -6.5px 1px -4px color-mix(in srgb, var(--c-glass) calc(var(--glass-reflex-dark) * 10%), transparent),
+    0px 1px 5px 0px color-mix(in srgb, #18181b calc(var(--glass-reflex-dark) * 10%), transparent),
+    0px 6px 16px 0px color-mix(in srgb, #18181b calc(var(--glass-reflex-dark) * 8%), transparent);
+  transition: background-color 200ms ease;
 }
 .nav-cta:hover {
-  background: var(--ink-hover);
+  background-color: color-mix(in srgb, var(--c-glass) 45%, transparent);
 }
 
 /* ── footer ── */
@@ -1453,16 +1588,33 @@ a.info-value:hover {
     padding: 72px 0;
   }
   .hero {
-    padding: 72px 0;
+    padding: 88px 0;
   }
-  .nav {
-    height: 62px;
+  .site-header {
+    top: 10px;
+    padding: 0 12px;
+  }
+  .nav-shell {
+    padding: 0;
+  }
+  .glass-content {
+    padding: 8px 8px 8px 18px;
   }
   .nav-links {
-    gap: 20px;
+    gap: 2px;
   }
   .nav-link {
-    font-size: 13.5px;
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+  .nav-link.active::after {
+    left: 10px;
+    right: 10px;
+  }
+  .nav-cta {
+    margin-left: 14px;
+    padding: 8px 13px;
+    font-size: 12.5px;
   }
   .case-nav {
     grid-template-columns: 1fr;
@@ -1478,6 +1630,18 @@ a.info-value:hover {
 @media (max-width: 480px) {
   .container {
     padding: 0 20px;
+  }
+  .nav-brand {
+    font-size: 12.5px;
+  }
+  .nav-link {
+    font-size: 12px;
+    padding: 8px 8px;
+  }
+  .nav-cta {
+    margin-left: 10px;
+    padding: 8px 11px;
+    font-size: 11.5px;
   }
   .stat-grid {
     grid-template-columns: 1fr;
