@@ -3,7 +3,7 @@ import SectionHead from "../components/SectionHead";
 import Reveal from "../components/Reveal";
 import usePageMeta from "../hooks/usePageMeta";
 import { PROFILE } from "../data/profile";
-import { PUBLICATIONS, SELF_NAME } from "../data/publications";
+import { PUBLICATIONS, SELF_NAME, RESEARCHGATE_URL } from "../data/publications";
 
 const TAG_CLASS = {
   published: "published",
@@ -47,7 +47,16 @@ export default function Research() {
             ))}
           </div>
 
-          <div className="contact-note" style={{ maxWidth: 860, marginTop: 36 }}>
+          <div className="more-row" style={{ maxWidth: 880, marginBottom: 36 }}>
+            <span style={{ color: "var(--muted)", fontSize: 14 }}>
+              Full texts and preprints live on my ResearchGate profile
+            </span>
+            <a href={RESEARCHGATE_URL} target="_blank" rel="noreferrer" className="arrow-link">
+              View ResearchGate <span className="arr" aria-hidden="true">→</span>
+            </a>
+          </div>
+
+          <div className="contact-note" style={{ maxWidth: 860, marginTop: 0 }}>
             My B.Sc. thesis — <strong>DeepDetect</strong>, a hybrid EfficientNet + Vision
             Transformer model for deepfake detection — is the foundation of several manuscripts
             above. Details on the{" "}

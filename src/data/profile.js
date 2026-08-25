@@ -18,13 +18,14 @@ export const PROFILE = {
   githubLabel: "github.com/noor4964",
   linkedin: "https://linkedin.com/in/nur-alam4964",
   linkedinLabel: "linkedin.com/in/nur-alam4964",
+  researchgate: "https://www.researchgate.net/profile/Sk-Nur-Alam",
   resumeUrl: "/SK_NUR_ALAM_CV.pdf",
   portrait: "/photo1.jpg",
 };
 
 export const STATS = [
-  { value: "3.80", label: "CGPA / 4.00" },
-  { value: "5", label: "Publications" },
+  { value: "3.79", label: "CGPA / 4.00" },
+  { value: "3", label: "Publications" },
   { value: "6+", label: "Projects built" },
   { value: "30+", label: "Tools & technologies" },
 ];
@@ -34,7 +35,7 @@ export const EDUCATION = [
     period: "2022 — 2026",
     role: "B.Sc. in Computer Science & Engineering",
     org: "American International University-Bangladesh (AIUB)",
-    desc: "CGPA 3.80 / 4.00. Thesis: DeepDetect — hybrid EfficientNet + Vision Transformer architecture for deepfake detection.",
+    desc: "CGPA 3.79 / 4.00. Thesis: DeepDetect — hybrid EfficientNet + Vision Transformer architecture for deepfake detection.",
   },
 ];
 

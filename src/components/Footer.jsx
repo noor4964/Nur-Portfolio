@@ -34,6 +34,7 @@ export default function Footer() {
             <ul>
               <li><a href={PROFILE.linkedin} target="_blank" rel="noreferrer">LinkedIn</a></li>
               <li><a href={PROFILE.github} target="_blank" rel="noreferrer">GitHub</a></li>
+              <li><a href={PROFILE.researchgate} target="_blank" rel="noreferrer">ResearchGate</a></li>
               <li><a href={`mailto:${PROFILE.email}`}>Email</a></li>
               <li><a href={PROFILE.resumeUrl} target="_blank" rel="noreferrer">Résumé (PDF)</a></li>
             </ul>

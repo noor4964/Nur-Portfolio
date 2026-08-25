@@ -5,6 +5,9 @@
 
 export const SELF_NAME = "SK. Nur Alam";
 
+export const RESEARCHGATE_URL =
+  "https://www.researchgate.net/profile/Sk-Nur-Alam";
+
 export const PUBLICATIONS = [
   {
     title:
@@ -18,6 +21,20 @@ export const PUBLICATIONS = [
     ],
     tag: "published",
     tagLabel: "Published",
+  },
+  {
+    title:
+      "Human-AI Interaction Discovery via Clustering: A Comparative Study of K-Means, Hierarchical, and HDBSCAN on Scientific Abstracts",
+    venue: "Manuscript in preparation",
+    authors: [
+      "SK. Nur Alam",
+      "Kazi Samia Mostofa",
+      "Tahmid Sadat",
+      "Muntahhara Takia Jaman",
+      "Abdus Salam",
+    ],
+    tag: "prep",
+    tagLabel: "Accepted for Publication",
   },
   {
     title:
@@ -39,7 +56,7 @@ export const PUBLICATIONS = [
     venue: "ICCA 2026 — HCI Track",
     authors: ["SK. Nur Alam", "et al."],
     tag: "prep",
-    tagLabel: "In Preparation",
+    tagLabel: "Accepted for Publication",
   },
   {
     title: "Benchmarking Lightweight Vision Transformers for Real-Time Deepfake Screening",
